@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Typing Speed Test</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Typing Speed Test</h1>
+        
+        <div class="stats">
+            <div class="stat-box">
+                <span id="wpm">0</span>
+                <label>WPM</label>
+            </div>
+            <div class="stat-box">
+                <span id="time">40</span>
+                <label>Seconds</label>
+            </div>
+            <div class="stat-box">
+                <span id="mistakes">0</span>
+                <label>Mistakes</label>
+            </div>
+        </div>
+
+        <div class="graph-container">
+            <canvas id="speedGraph"></canvas>
+        </div>
+
+        <div class="typing-container">
+            <div id="text-display" class="text-display"></div>
+            <input id="input-area" class="input-area" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+        </div>
+
+        <div class="buttons">
+            <button id="retry-btn" disabled>Retry</button>
+            <button id="next-btn" disabled>Next Prompt</button>
+            <button id="leaderboard-btn">Leaderboard</button>
+        </div>
+
+        <!-- Leaderboard Modal -->
+        <div id="leaderboard-modal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h2>Leaderboard</h2>
+                <div id="leaderboard-list"></div>
+            </div>
+        </div>
+
+        <!-- Score Modal -->
+        <div id="score-modal" class="modal">
+            <div class="modal-content">
+                <h2>New High Score!</h2>
+                <p>Your WPM: <span id="final-score"></span></p>
+                <p>Mistakes: <span id="final-mistakes"></span></p>
+                <input type="text" id="player-name" placeholder="Enter your name">
+                <input type="text" id="player-country" placeholder="Enter your country">
+                <button id="save-score">Save Score</button>
+                <button id="skip-score" type="button">Skip</button>
+            </div>
+        </div>
+
+        <!-- Comments Section -->
+        <div class="comments-section">
+            <h2>Comments</h2>
+            <form id="comments-form">
+                <input type="text" id="comment-name" placeholder="Your name" required>
+                <textarea id="comment-text" placeholder="Your comment" required></textarea>
+                <button type="submit">Submit Comment</button>
+            </form>
+            <div id="comments-list"></div>
+        </div>
+
+        <!-- Contact Section -->
+        <div class="contact-section">
+            <h2>Contact</h2>
+            <p>For feedback or inquiries, email: <a href="mailto:sabitrahmansr1001@gmail.com">sabitrahmansr1001@gmail.com</a></p>
+        </div>
+
+        <!-- Admin Panel Modal -->
+        <div id="admin-modal" class="modal">
+            <div class="modal-content">
+                <span class="close" id="admin-close">&times;</span>
+                <h2>Admin Panel</h2>
+                <div>
+                    <h3>Comments</h3>
+                    <div id="admin-comments-list"></div>
+                </div>
+                <div style="margin-top:24px;">
+                    <h3>Leaderboard</h3>
+                    <div id="admin-leaderboard-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="background-animation"></div>
+    <!-- Google Sheets API -->
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gapi-sheets@1.0.0/dist/gapi-sheets.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html> 
