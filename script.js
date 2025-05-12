@@ -427,9 +427,14 @@ async function saveScore() {
                 'Content-Type': 'application/json'
             }
         });
-        const result = await response.json();
+        let result;
+        try {
+            result = await response.json();
+        } catch (e) {
+            // If not JSON, treat as error
+            throw new Error('Non-JSON response from server');
+        }
         if (result.result === 'success') {
-            // Save to local leaderboard for display
             leaderboard.push(score);
             leaderboard.sort((a, b) => b.wpm - a.wpm);
             leaderboard = leaderboard.slice(0, 10);
@@ -438,11 +443,11 @@ async function saveScore() {
             updateLeaderboard();
             alert('Score saved successfully!');
         } else {
-            throw new Error('Failed to save score');
+            throw new Error(result.error || 'Failed to save score');
         }
     } catch (error) {
         console.error('Error saving score:', error);
-        alert('Error saving score. Please try again.');
+        alert('Error saving score. Please try again.\n' + (error.message || ''));
     }
 }
 
