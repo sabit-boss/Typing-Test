@@ -83,27 +83,8 @@ const commentsList = document.getElementById('comments-list');
 let wordsArray = [];
 let incorrectIndexes = [];
 
-// Google Sheets configuration
-// TODO: Replace these values with your own credentials
-const SPREADSHEET_ID = '1xqZsg-vxa57YMva0IEQTCRhNQXtpNemr5i6oRLICwdQ'; // Get this from your Google Sheet URL
-const API_KEY = 'AIzaSyAGes5A3-v4_FI7riWE973IbdPCsu-jWbQ'; // Get this from Google Cloud Console
-const RANGE = 'Sheet1!A:E'; // Adjust if your sheet name is different
-
-// Initialize Google Sheets API
-function initGoogleSheets() {
-    gapi.client.init({
-        apiKey: API_KEY,
-        discoveryDocs: ['https://sheets.googleapis.com/$discovery/rest?version=v4'],
-    }).then(() => {
-        console.log('Google Sheets API initialized');
-        updateLeaderboard(); // Load initial leaderboard data
-    }).catch(error => {
-        console.error('Error initializing Google Sheets:', error);
-    });
-}
-
-// Load Google Sheets API
-gapi.load('client', initGoogleSheets);
+// Google Apps Script Web App URL
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxI09tWTn_aYH_469wXwVWJDaWwrw2QH6iYwknh0TJw5vtx9cqtOk5tYjU6C1a91kYyNg/exec';
 
 // Initialize speed chart
 function initSpeedChart() {
@@ -439,31 +420,26 @@ async function saveScore() {
     };
 
     try {
-        // Save to Google Sheets
-        await gapi.client.sheets.spreadsheets.values.append({
-            spreadsheetId: SPREADSHEET_ID,
-            range: RANGE,
-            valueInputOption: 'USER_ENTERED',
-            resource: {
-                values: [[
-                    score.name,
-                    score.country,
-                    score.wpm,
-                    score.mistakes,
-                    score.date
-                ]]
+        const response = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            body: JSON.stringify(score),
+            headers: {
+                'Content-Type': 'application/json'
             }
         });
-
-        // Also save to local storage for backup
-        leaderboard.push(score);
-        leaderboard.sort((a, b) => b.wpm - a.wpm);
-        leaderboard = leaderboard.slice(0, 10);
-        localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
-        
-        scoreModal.style.display = 'none';
-        updateLeaderboard();
-        alert('Score saved successfully!');
+        const result = await response.json();
+        if (result.result === 'success') {
+            // Save to local leaderboard for display
+            leaderboard.push(score);
+            leaderboard.sort((a, b) => b.wpm - a.wpm);
+            leaderboard = leaderboard.slice(0, 10);
+            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+            scoreModal.style.display = 'none';
+            updateLeaderboard();
+            alert('Score saved successfully!');
+        } else {
+            throw new Error('Failed to save score');
+        }
     } catch (error) {
         console.error('Error saving score:', error);
         alert('Error saving score. Please try again.');
@@ -471,54 +447,21 @@ async function saveScore() {
 }
 
 // Update updateLeaderboard function
-async function updateLeaderboard() {
+function updateLeaderboard() {
     const leaderboardList = document.getElementById('leaderboard-list');
     leaderboardList.innerHTML = '';
 
-    try {
-        // Get scores from Google Sheets
-        const response = await gapi.client.sheets.spreadsheets.values.get({
-            spreadsheetId: SPREADSHEET_ID,
-            range: RANGE
-        });
-
-        const rows = response.result.values || [];
-        const scores = rows.slice(1).map(row => ({
-            name: row[0],
-            country: row[1],
-            wpm: parseInt(row[2]),
-            mistakes: parseInt(row[3]),
-            date: row[4]
-        }));
-
-        // Sort by WPM
-        scores.sort((a, b) => b.wpm - a.wpm);
-
-        // Display top 10
-        scores.slice(0, 10).forEach(score => {
-            const item = document.createElement('div');
-            item.className = 'leaderboard-item';
-            item.innerHTML = `
-                <span>${score.name} (${score.country})</span>
-                <span>${score.wpm} WPM</span>
-                <span>${score.mistakes} mistakes</span>
-            `;
-            leaderboardList.appendChild(item);
-        });
-    } catch (error) {
-        console.error('Error fetching leaderboard:', error);
-        // Fallback to local storage if Google Sheets fails
-        leaderboard.forEach(score => {
-            const item = document.createElement('div');
-            item.className = 'leaderboard-item';
-            item.innerHTML = `
-                <span>${score.name} (${score.country})</span>
-                <span>${score.wpm} WPM</span>
-                <span>${score.mistakes} mistakes</span>
-            `;
-            leaderboardList.appendChild(item);
-        });
-    }
+    // Display top 10
+    leaderboard.slice(0, 10).forEach(score => {
+        const item = document.createElement('div');
+        item.className = 'leaderboard-item';
+        item.innerHTML = `
+            <span>${score.name} (${score.country})</span>
+            <span>${score.wpm} WPM</span>
+            <span>${score.mistakes} mistakes</span>
+        `;
+        leaderboardList.appendChild(item);
+    });
 }
 
 function loadComments() {
